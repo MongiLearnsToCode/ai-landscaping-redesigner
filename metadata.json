@@ -1,0 +1,5 @@
+{
+  "name": "AI Landscaping Redesigner",
+  "description": "An application that uses the Gemini 2.5 Flash image AI model to redesign outdoor spaces. Upload a photo of your garden, patio, or backyard, select a style, and let the AI generate a new, beautiful landscape design.",
+  "requestFramePermissions": []
+}
