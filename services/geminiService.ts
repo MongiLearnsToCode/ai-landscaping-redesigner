@@ -8,7 +8,7 @@ export const redesignOutdoorSpace = async (
   allowStructuralChanges: boolean,
   climateZone: string
 ): Promise<{ base64ImageBytes: string; mimeType: string; catalog: DesignCatalog }> => {
-  const response = await fetch('http://localhost:3000/redesign', {
+  const response = await fetch('/redesign', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

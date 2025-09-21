@@ -24,7 +24,7 @@ To build and run this project locally, follow these steps:
     npm run dev
     ```
 
-The application will be available at `http://localhost:5173` by default.
+The application will be available at `https://ai-landscaping-redesigner.vercel.app/`.
 
 **Other Scripts:**
 
