@@ -22,14 +22,6 @@ interface DesignerState {
 }
 
 const getInitialState = (): DesignerState => {
-  try {
-    const savedState = localStorage.getItem('designerSession');
-    if (savedState) {
-      return JSON.parse(savedState);
-    }
-  } catch (error) {
-    console.error("Could not parse designer session state from localStorage", error);
-  }
   return {
     originalImage: null,
     selectedStyle: LANDSCAPING_STYLES[0].id,
@@ -53,9 +45,9 @@ const DesignerPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Persist state to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('designerSession', JSON.stringify(designerState));
-  }, [designerState]);
+  // useEffect(() => {
+  //   localStorage.setItem('designerSession', JSON.stringify(designerState));
+  // }, [designerState]);
   
   // Load item from history
   useEffect(() => {
@@ -115,9 +107,9 @@ const DesignerPage: React.FC = () => {
 
       setRedesignedImage(`data:${result.mimeType};base64,${result.base64ImageBytes}`);
       setDesignCatalog(result.catalog);
-      
+
       // Clear session so a refresh doesn't show the old inputs
-      localStorage.removeItem('designerSession');
+      // localStorage.removeItem('designerSession');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
