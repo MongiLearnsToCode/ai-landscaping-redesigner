@@ -1,7 +1,9 @@
-import React from 'react';
-import { useToast } from '../contexts/ToastContext';
+'use client';
 
-export const ContactPage: React.FC = () => {
+import React from 'react';
+import { useToast } from '../src/contexts/ToastContext';
+
+const ContactPage: React.FC = () => {
   const { addToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -34,9 +36,9 @@ export const ContactPage: React.FC = () => {
                 <a href="mailto:support@example.com" className="text-emerald-600 dark:text-emerald-400 hover:underline">
                     support@example.com
                 </a>
-            </div>
+             </div>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
@@ -60,3 +62,11 @@ export const ContactPage: React.FC = () => {
     </div>
   );
 };
+
+export const dynamic = 'force-dynamic';
+
+export async function getServerSideProps() {
+  return { props: {} };
+}
+
+export default ContactPage;

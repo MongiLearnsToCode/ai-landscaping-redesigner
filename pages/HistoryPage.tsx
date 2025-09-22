@@ -1,15 +1,13 @@
+
+'use client';
+
 import React from 'react';
-import { HistoryCard } from '../components/HistoryCard';
-import type { HistoryItem } from '../types';
+import { HistoryCard } from '../src/components/HistoryCard';
+import { useHistory } from '../src/contexts/HistoryContext';
 
-interface HistoryPageProps {
-  historyItems: HistoryItem[];
-  onView: (item: HistoryItem) => void;
-  onPin: (id: string) => void;
-  onDelete: (id: string) => void;
-}
+const HistoryPage: React.FC = () => {
+  const { history, pinItem, deleteItem, viewFromHistory } = useHistory();
 
-export const HistoryPage: React.FC<HistoryPageProps> = ({ historyItems, onView, onPin, onDelete }) => {
   return (
     <div className="w-full">
       <div className="mb-6">
@@ -19,7 +17,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyItems, onView, 
         </p>
       </div>
 
-      {historyItems.length === 0 ? (
+      {history.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-lg shadow-md">
           <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" />
@@ -32,13 +30,13 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyItems, onView, 
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {historyItems.map(item => (
+          {history.map(item => (
             <HistoryCard
               key={item.id}
               item={item}
-              onView={onView}
-              onPin={onPin}
-              onDelete={onDelete}
+              onView={viewFromHistory}
+              onPin={pinItem}
+              onDelete={deleteItem}
             />
           ))}
         </div>
@@ -46,3 +44,11 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyItems, onView, 
     </div>
   );
 };
+
+export const dynamic = 'force-dynamic';
+
+export async function getServerSideProps() {
+  return { props: {} };
+}
+
+export default HistoryPage;

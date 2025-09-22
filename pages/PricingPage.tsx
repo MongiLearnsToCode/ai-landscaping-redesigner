@@ -1,10 +1,6 @@
-import React, { useState } from 'react';
-// FIX: The 'Page' type is exported from AppContext, not App.
-import type { Page } from '../contexts/AppContext';
 
-interface PricingPageProps {
-  onNavigate: (page: Page) => void;
-}
+import React, { useState } from 'react';
+import Link from 'next/link';
 
 type BillingCycle = 'monthly' | 'annual';
 
@@ -60,7 +56,7 @@ const PlanCard: React.FC<{
 };
 
 
-export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
+const PricingPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
   return (
@@ -95,7 +91,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        <PlanCard 
+        <PlanCard
             plan="Personal"
             price={billingCycle === 'monthly' ? "$12" : "$120"}
             pricePer={billingCycle === 'monthly' ? "/ month" : "/ year"}
@@ -105,7 +101,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             description="For casual users or hobbyists"
             cta="Get Personal"
         />
-        <PlanCard 
+        <PlanCard
             plan="Creator"
             price={billingCycle === 'monthly' ? "$29" : "$240"}
             pricePer={billingCycle === 'monthly' ? "/ month" : "/ year"}
@@ -117,7 +113,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             isPopular={true}
             ribbonText={billingCycle === 'annual' ? 'Most Valuable' : 'Most Popular'}
         />
-        <PlanCard 
+        <PlanCard
             plan="Business"
             price={billingCycle === 'monthly' ? "$60" : "$480"}
             pricePer={billingCycle === 'monthly' ? "/ month" : "/ year"}
@@ -132,12 +128,9 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
       <div className="mt-12 pt-8 text-center border-t border-gray-200 dark:border-gray-700 max-w-3xl mx-auto">
         <p className="text-lg text-gray-600 dark:text-gray-300">
             Want to try it out first? Get 5 images free →
-            <button
-                onClick={() => onNavigate('main')}
-                className="ml-2 font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
-            >
-                Start Free
-            </button>
+            <Link href="/" className="ml-2 font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+              Start Free
+            </Link>
         </p>
       </div>
 
@@ -149,3 +142,11 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
     </div>
   );
 };
+
+export const dynamic = 'force-dynamic';
+
+export async function getServerSideProps() {
+  return { props: {} };
+}
+
+export default PricingPage;

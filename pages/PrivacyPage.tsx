@@ -9,7 +9,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   </div>
 );
 
-export const PrivacyPage: React.FC = () => {
+const PrivacyPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-8 sm:p-12 rounded-xl shadow-lg">
       <div className="text-center mb-12">
@@ -31,7 +31,7 @@ export const PrivacyPage: React.FC = () => {
             <li><strong>Account Information:</strong> If you create an account, we collect information such as your email address and payment information to manage your subscription.</li>
         </ul>
       </Section>
-      
+
       <Section title="2. How We Use Information">
         <p>
           We use the information we collect to:
@@ -42,15 +42,15 @@ export const PrivacyPage: React.FC = () => {
             <li>Improve, personalize, and expand our services.</li>
             <li>Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the website, and for marketing and promotional purposes.</li>
             <li>For compliance purposes, including enforcing our Terms of Service, or other legal rights.</li>
-        </ul>
+         </ul>
       </Section>
-      
+
       <Section title="3. How We Share Information">
         <p>
           We do not sell your personal information. We may share information with third-party service providers to help us operate our business, such as payment processors and AI model providers. These third parties are contractually obligated to protect your information and are not permitted to use it for any other purpose. Uploaded images are sent to our AI provider (Google Gemini) for processing and are subject to their privacy policies.
         </p>
       </Section>
-      
+
       <Section title="4. Data Retention">
         <p>
           We retain your information for as long as necessary to provide the service and fulfill the transactions you have requested, or for other essential purposes such as complying with our legal obligations, resolving disputes, and enforcing our agreements. Redesign history is stored in your browser's local storage and is subject to automatic deletion as described in the application.
@@ -65,3 +65,11 @@ export const PrivacyPage: React.FC = () => {
     </div>
   );
 };
+
+export const dynamic = 'force-dynamic';
+
+export async function getServerSideProps() {
+  return { props: {} };
+}
+
+export default PrivacyPage;
