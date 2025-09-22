@@ -17,12 +17,12 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {LANDSCAPING_STYLES.map((style) => (
           <button
             key={style.id}
             onClick={() => onStyleSelect(style.id)}
-            className={`w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-emerald-500 ${
+            className={`w-full px-2 md:px-3 py-2 text-xs md:text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-emerald-500 ${
               selectedStyle === style.id
                 ? 'bg-emerald-600 text-white shadow-md'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
