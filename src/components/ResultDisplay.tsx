@@ -89,27 +89,27 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center gap-2 sm:gap-4 opacity-0 group-hover:opacity-100 transition-opacity p-4">
                     <button
                         onClick={() => openModal(imageUrl)}
-                        className="bg-white/90 hover:bg-white text-gray-800 font-bold px-4 py-2 rounded-lg text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
+                        className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
                         aria-label="View larger"
                     >
-                        <EnlargeIcon className="h-5 w-5 mr-2" />
+                        <EnlargeIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
                         Larger
                     </button>
                     <button
                         onClick={handleDownload}
-                        className="bg-white/90 hover:bg-white text-gray-800 font-bold px-4 py-2 rounded-lg text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
+                        className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
                         aria-label="Download image"
                     >
-                        <DownloadIcon className="h-5 w-5 mr-2" />
+                        <DownloadIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
                         Download
                     </button>
                     {canShare && (
                          <button
                             onClick={handleShare}
-                            className="bg-white/90 hover:bg-white text-gray-800 font-bold px-4 py-2 rounded-lg text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
+                            className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
                             aria-label="Share image"
                         >
-                            <ShareIcon className="h-5 w-5 mr-2" />
+                            <ShareIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
                             Share
                         </button>
                     )}

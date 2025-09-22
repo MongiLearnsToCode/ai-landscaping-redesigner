@@ -59,12 +59,12 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({ item, onView, onPin, o
       </div>
       <div className="p-3 bg-gray-50 dark:bg-gray-700/50 flex-grow flex flex-col justify-between">
          <div className="flex items-center justify-between space-x-2">
-            <button
-                onClick={() => onView(item)}
-                className="w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-3 py-2 rounded-md transition-colors"
-            >
-                View
-            </button>
+             <button
+                 onClick={() => onView(item)}
+                 className="w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs md:text-sm font-semibold px-2 md:px-3 py-2 rounded-md transition-colors"
+             >
+                 View
+             </button>
             <button
                 onClick={() => onPin(item.id)}
                 title={item.isPinned ? 'Unpin' : 'Pin'}

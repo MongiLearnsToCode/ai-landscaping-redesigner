@@ -48,9 +48,9 @@ const PlanCard: React.FC<{
 
       <p className="text-center text-gray-600 dark:text-gray-300 flex-grow">{description}</p>
       
-      <a href="#" className={`w-full mt-8 block text-center font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg ${buttonClasses}`}>
-        {cta}
-      </a>
+       <a href="#" className={`w-full mt-8 block text-center font-bold py-3 px-2 md:px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg text-sm md:text-base ${buttonClasses}`}>
+         {cta}
+       </a>
     </div>
   );
 };
@@ -72,7 +72,7 @@ const PricingPage: React.FC = () => {
 
       {/* Billing Cycle Toggle */}
       <div className="flex justify-center items-center my-10">
-        <span className={`px-4 py-2 font-medium transition ${billingCycle === 'monthly' ? 'text-gray-800 dark:text-gray-100' : 'text-gray-500'}`}>Monthly</span>
+        <span className={`px-2 md:px-4 py-2 font-medium transition text-sm md:text-base ${billingCycle === 'monthly' ? 'text-gray-800 dark:text-gray-100' : 'text-gray-500'}`}>Monthly</span>
         <button
           onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
           className="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-900"
@@ -84,9 +84,9 @@ const PricingPage: React.FC = () => {
             } inline-block w-4 h-4 transform bg-white rounded-full transition-transform`}
           />
         </button>
-        <span className={`px-4 py-2 font-medium transition ${billingCycle === 'annual' ? 'text-gray-800 dark:text-gray-100' : 'text-gray-500'}`}>
+        <span className={`px-2 md:px-4 py-2 font-medium transition text-sm md:text-base ${billingCycle === 'annual' ? 'text-gray-800 dark:text-gray-100' : 'text-gray-500'}`}>
           Annual
-          <span className="ml-2 text-xs font-bold text-emerald-500 bg-emerald-100 dark:bg-emerald-900/50 dark:text-emerald-400 rounded-full px-2 py-0.5">Save up to 33%</span>
+          <span className="ml-1 md:ml-2 text-xs font-bold text-emerald-500 bg-emerald-100 dark:bg-emerald-900/50 dark:text-emerald-400 rounded-full px-1 md:px-2 py-0.5">Save up to 33%</span>
         </span>
       </div>
 
