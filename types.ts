@@ -1,3 +1,11 @@
+import type { DesignCatalog as DesignCatalogType } from './types';
+// FIX: Removed conflicting self-import of 'ImageFile'.
+export interface ImageFile {
+  name: string;
+  type: string;
+  base64: string;
+}
+
 export type LandscapingStyle = 'modern' | 'minimalist' | 'rustic' | 'mediterranean' | 'japanese' | 'tropical';
 
 export interface StyleOption {
@@ -20,23 +28,22 @@ export interface DesignCatalog {
     features: Feature[];
 }
 
-// Represents the metadata stored in the database
+// Represents the metadata stored in localStorage (without large image data)
 export interface HistoryItem {
     id: string;
-    user_id: string;
-    design_catalog: DesignCatalog;
+    designCatalog: DesignCatalog;
     style: LandscapingStyle;
-    climate_zone: string;
-    created_at: string;
-    is_pinned: boolean;
-    original_image_url: string;
-    redesigned_image_url: string;
+    climateZone: string;
+    timestamp: number;
+    isPinned: boolean;
+    originalImageInfo: { id: string; name: string; type: string };
+    redesignedImageInfo: { id: string; type: string };
 }
 
-// Represents a fully loaded history item for display
+// Represents a fully loaded history item, with image data fetched from IndexedDB
 export interface HydratedHistoryItem extends HistoryItem {
-    originalImage: string;
-    redesignedImage: string;
+    originalImage: ImageFile;
+    redesignedImage: string; // This will be the full data URL for the component
 }
 
 

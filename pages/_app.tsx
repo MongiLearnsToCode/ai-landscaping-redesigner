@@ -2,9 +2,6 @@
 'use client';
 
 import type { AppProps } from 'next/app';
-import { useState } from 'react';
-import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { AppProvider, useApp } from '../src/contexts/AppContext';
 import { HistoryProvider } from '../src/contexts/HistoryContext';
 import { ToastProvider } from '../src/contexts/ToastContext';
@@ -22,21 +19,14 @@ function AppContent({ Component, pageProps, router }: AppProps) {
 }
 
 function MyApp({ Component, pageProps, router }: AppProps) {
-  const [supabaseClient] = useState(() => createPagesBrowserClient());
-
   return (
-    <SessionContextProvider
-      supabaseClient={supabaseClient}
-      initialSession={pageProps.initialSession}
-    >
-      <AppProvider>
-        <ToastProvider>
-          <HistoryProvider>
-            <AppContent Component={Component} pageProps={pageProps} router={router} />
-          </HistoryProvider>
-        </ToastProvider>
-      </AppProvider>
-    </SessionContextProvider>
+    <AppProvider>
+      <ToastProvider>
+        <HistoryProvider>
+          <AppContent Component={Component} pageProps={pageProps} router={router} />
+        </HistoryProvider>
+      </ToastProvider>
+    </AppProvider>
   );
 }
 

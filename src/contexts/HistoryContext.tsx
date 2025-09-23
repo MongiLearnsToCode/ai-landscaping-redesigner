@@ -1,22 +1,23 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
-import type { HistoryItem, DesignCatalog, LandscapingStyle } from '../../types';
+import * as historyService from '../services/historyService';
+import * as imageDB from '../services/imageDB';
+import type { HistoryItem, HydratedHistoryItem, ImageFile, DesignCatalog, LandscapingStyle } from '../../types';
 import { useToast } from './ToastContext';
 import { useApp } from './AppContext';
 
 interface NewRedesignData {
-    original_image_url: string;
-    redesigned_image_url: string;
-    design_catalog: DesignCatalog;
+    originalImage: ImageFile;
+    redesignedImage: { base64: string; type: string };
+    catalog: DesignCatalog;
     style: LandscapingStyle;
-    climate_zone: string;
+    climateZone: string;
 }
 
 interface HistoryContextType {
   history: HistoryItem[];
   saveNewRedesign: (data: NewRedesignData) => Promise<void>;
-  deleteItem: (id: string) => Promise<void>;
-  pinItem: (id: string) => Promise<void>;
+  deleteItem: (id: string) => void;
+  pinItem: (id: string) => void;
   viewFromHistory: (item: HistoryItem) => void;
 }
 
@@ -24,97 +25,89 @@ const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
 
 export const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const supabase = useSupabaseClient();
-  const user = useUser();
   const { addToast } = useToast();
   const { loadItem } = useApp();
 
-  const refreshHistory = useCallback(async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('designs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setHistory(data || []);
-    } catch (error) {
-      console.error('Error fetching history:', error);
-      addToast('Could not load your design history.', 'error');
-    }
-  }, [supabase, user, addToast]);
+  const refreshHistory = useCallback(() => {
+    setHistory(historyService.getHistory());
+  }, []);
 
   useEffect(() => {
     refreshHistory();
   }, [refreshHistory]);
 
   const saveNewRedesign = useCallback(async (data: NewRedesignData) => {
-    if (!user) {
-        addToast('You must be logged in to save a design.', 'error');
-        return;
-    }
-    try {
-        const { data: newRecord, error } = await supabase
-            .from('designs')
-            .insert({
-                ...data,
-                user_id: user.id,
-            })
-            .select()
-            .single();
+    const id = `history_${Date.now()}`;
+    const originalImageId = `${id}_original`;
+    const redesignedImageId = `${id}_redesigned`;
 
-        if (error) throw error;
-        
-        setHistory(prev => [newRecord, ...prev]);
+    try {
+        await imageDB.saveImage({ id: originalImageId, base64: data.originalImage.base64, type: data.originalImage.type });
+        await imageDB.saveImage({ id: redesignedImageId, base64: data.redesignedImage.base64, type: data.redesignedImage.type });
+
+        const historyItemForStorage: HistoryItem = {
+            id,
+            timestamp: Date.now(),
+            isPinned: false,
+            style: data.style,
+            climateZone: data.climateZone,
+            designCatalog: data.catalog,
+            originalImageInfo: { id: originalImageId, name: data.originalImage.name, type: data.originalImage.type },
+            redesignedImageInfo: { id: redesignedImageId, type: data.redesignedImage.type }
+        };
+
+        historyService.saveHistoryItemMetadata(historyItemForStorage);
+        refreshHistory();
         addToast("Redesign saved to history!", "success");
     } catch (err) {
         console.error("Failed to save history item", err);
         addToast("Error saving redesign to history.", "error");
+        // In a production app, you might add cleanup logic here to delete orphaned images from IndexedDB if metadata saving fails.
     }
-  }, [supabase, user, addToast]);
+  }, [refreshHistory, addToast]);
 
   const deleteItem = useCallback(async (id: string) => {
-    try {
-        const { error } = await supabase.from('designs').delete().match({ id });
-        if (error) throw error;
-        setHistory(prev => prev.filter(item => item.id !== id));
-        addToast("Item deleted from history.", "info");
-    } catch (error) {
-        console.error('Error deleting item:', error);
-        addToast("Failed to delete item.", "error");
+    await historyService.deleteHistoryItem(id);
+    refreshHistory();
+    addToast("Item deleted from history.", "info");
+  }, [addToast, refreshHistory]);
+
+  const pinItem = useCallback((id: string) => {
+    const updatedHistory = historyService.togglePin(id);
+    if (updatedHistory) {
+      setHistory(updatedHistory);
+      const isPinned = updatedHistory.find(item => item.id === id)?.isPinned;
+      addToast(isPinned ? "Item pinned!" : "Item unpinned.", "success");
+    } else {
+      addToast("You can only pin up to 7 designs.", "error");
     }
-  }, [supabase, addToast]);
+  }, [addToast]);
 
-  const pinItem = useCallback(async (id: string) => {
-    const itemToToggle = history.find(item => item.id === id);
-    if (!itemToToggle) return;
-
+  const viewFromHistory = useCallback(async (item: HistoryItem) => {
     try {
-        const { data, error } = await supabase
-            .from('designs')
-            .update({ is_pinned: !itemToToggle.is_pinned })
-            .match({ id })
-            .select()
-            .single();
+        const originalImageData = await imageDB.getImage(item.originalImageInfo.id);
+        const redesignedImageData = await imageDB.getImage(item.redesignedImageInfo.id);
 
-        if (error) throw error;
+        if (!originalImageData || !redesignedImageData) {
+            throw new Error("Could not find images in the local database.");
+        }
 
-        setHistory(prev => prev.map(item => item.id === id ? data : item));
-        addToast(data.is_pinned ? "Item pinned!" : "Item unpinned.", "success");
-    } catch (error) {
-        console.error('Error pinning item:', error);
-        addToast("Failed to update pin status.", "error");
-    }
-  }, [supabase, history, addToast]);
-
-  const viewFromHistory = useCallback((item: HistoryItem) => {
-    // The item from Supabase already has the URLs, so we can load it directly.
-    // The `HydratedHistoryItem` in types.ts is now structurally the same as HistoryItem
-    // but we keep it for semantic clarity in the components.
-    loadItem(item as any);
-  }, [loadItem]);
+        const hydratedItem: HydratedHistoryItem = {
+            ...item,
+            originalImage: {
+                base64: originalImageData.base64,
+                name: item.originalImageInfo.name,
+                type: item.originalImageInfo.type,
+            },
+            redesignedImage: `data:${redesignedImageData.type};base64,${redesignedImageData.base64}`
+        };
+        
+        loadItem(hydratedItem);
+      } catch (err) {
+          console.error("Failed to load item from history:", err);
+          addToast("Could not load images for this history item.", "error");
+      }
+  }, [loadItem, addToast]);
 
   const value = {
     history,
