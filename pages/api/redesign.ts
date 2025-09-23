@@ -95,41 +95,45 @@ export default async function handler(
     const imageBase64 = Buffer.from(imageBuffer).toString('base64');
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
-    const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const imageResponse = await fetch(original_image_url);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image from URL: ${original_image_url}`);
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const imageBase64 = Buffer.from(imageBuffer).toString('base64');
+    const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": `${process.env.NEXT_PUBLIC_SITE_URL}`,
-        "X-Title": "AI Landscaping Redesigner",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemini-pro-vision",
-        messages: [
+        contents: [
           {
-            role: "user",
-            content: [
+            parts: [
+              { text: prompt },
               {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${imageBase64}`
+                inline_data: {
+                  mime_type: mimeType,
+                  data: imageBase64
                 }
-              },
-              { type: "text", text: prompt },
+              }
             ]
           }
         ]
       })
     });
 
-    if (!openRouterResponse.ok) {
-      const errorBody = await openRouterResponse.text();
-      console.error('OpenRouter API error:', errorBody);
-      throw new Error(`OpenRouter API request failed with status ${openRouterResponse.status}`);
+    if (!geminiResponse.ok) {
+      const errorBody = await geminiResponse.text();
+      console.error('Gemini API error:', errorBody);
+      throw new Error(`Gemini API request failed with status ${geminiResponse.status}`);
     }
 
-    const result = await openRouterResponse.json();
-    const messageContent = result.choices[0]?.message?.content;
+    const result = await geminiResponse.json();
+    const messageContent = result.candidates[0]?.content.parts[0].text;
+
 
     if (!messageContent) {
       throw new Error('Invalid response from OpenRouter model.');
