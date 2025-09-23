@@ -4,17 +4,9 @@ import type { HistoryItem, DesignCatalog, LandscapingStyle } from '../../types';
 import { useToast } from './ToastContext';
 import { useApp } from './AppContext';
 
-interface NewRedesignData {
-    original_image_url: string;
-    redesigned_image_url: string;
-    design_catalog: DesignCatalog;
-    style: LandscapingStyle;
-    climate_zone: string;
-}
-
 interface HistoryContextType {
   history: HistoryItem[];
-  saveNewRedesign: (data: NewRedesignData) => Promise<void>;
+  addNewRedesignToHistory: (item: HistoryItem) => void;
   deleteItem: (id: string) => Promise<void>;
   pinItem: (id: string) => Promise<void>;
   viewFromHistory: (item: HistoryItem) => void;
@@ -50,30 +42,9 @@ export const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     refreshHistory();
   }, [refreshHistory]);
 
-  const saveNewRedesign = useCallback(async (data: NewRedesignData) => {
-    if (!user) {
-        addToast('You must be logged in to save a design.', 'error');
-        return;
-    }
-    try {
-        const { data: newRecord, error } = await supabase
-            .from('designs')
-            .insert({
-                ...data,
-                user_id: user.id,
-            })
-            .select()
-            .single();
-
-        if (error) throw error;
-        
-        setHistory(prev => [newRecord, ...prev]);
-        addToast("Redesign saved to history!", "success");
-    } catch (err) {
-        console.error("Failed to save history item", err);
-        addToast("Error saving redesign to history.", "error");
-    }
-  }, [supabase, user, addToast]);
+  const addNewRedesignToHistory = useCallback((item: HistoryItem) => {
+    setHistory(prev => [item, ...prev]);
+  }, []);
 
   const deleteItem = useCallback(async (id: string) => {
     try {
@@ -118,7 +89,7 @@ export const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const value = {
     history,
-    saveNewRedesign,
+    addNewRedesignToHistory,
     deleteItem,
     pinItem,
     viewFromHistory,

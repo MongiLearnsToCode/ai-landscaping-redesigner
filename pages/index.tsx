@@ -32,7 +32,7 @@ const getInitialState = (): DesignerState => {
 
 const DesignerPageContent: React.FC = () => {
   const { itemToLoad, onItemLoaded } = useApp();
-  const { saveNewRedesign } = useHistory();
+  const { addNewRedesignToHistory } = useHistory();
   const { addToast } = useToast();
 
   const [designerState, setDesignerState] = useState<DesignerState>(getInitialState);
@@ -104,7 +104,7 @@ const DesignerPageContent: React.FC = () => {
 
       const newDesign = await response.json();
 
-      saveNewRedesign(newDesign);
+      addNewRedesignToHistory(newDesign);
       setRedesignedImage(newDesign.redesigned_image_url);
       setDesignCatalog(newDesign.design_catalog);
       addToast('Redesign complete!', 'success');
@@ -117,7 +117,7 @@ const DesignerPageContent: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [originalImage, selectedStyle, allowStructuralChanges, climateZone, saveNewRedesign, addToast]);
+  }, [originalImage, selectedStyle, allowStructuralChanges, climateZone, addNewRedesignToHistory, addToast]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
