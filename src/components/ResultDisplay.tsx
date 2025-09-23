@@ -86,7 +86,7 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
             <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-4">{title}</h3>
             <div className="relative group w-full aspect-[4/3] rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <ImageWithLoader src={imageUrl} alt={title} />
-                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center gap-2 sm:gap-4 opacity-0 group-hover:opacity-100 transition-opacity p-4">
+                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center gap-2 sm:gap-4 transition-opacity p-4">
                     <button
                         onClick={() => openModal(imageUrl)}
                         className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
