@@ -7,7 +7,6 @@ import { ImageUploader } from '../src/components/ImageUploader';
 import { StyleSelector } from '../src/components/StyleSelector';
 import { ClimateSelector } from '../src/components/ClimateSelector';
 import { ResultDisplay } from '../src/components/ResultDisplay';
-import { redesignOutdoorSpace } from '../src/services/geminiService';
 import { LANDSCAPING_STYLES } from '../constants';
 import type { LandscapingStyle, DesignCatalog, HydratedHistoryItem } from '../types';
 import { useApp } from '../src/contexts/AppContext';
@@ -84,36 +83,40 @@ const DesignerPageContent: React.FC = () => {
     setRedesignedImage(null);
     setDesignCatalog(null);
 
-    addToast('This feature is being updated. Please check back soon!', 'info');
-    setIsLoading(false);
-    // try {
-    //   const result = await redesignOutdoorSpace(
-    //     originalImage.base64,
-    //     originalImage.type,
-    //     selectedStyle,
-    //     allowStructuralChanges,
-    //     climateZone
-    //   );
-      
-    //   await saveNewRedesign({
-    //     originalImage: originalImage,
-    //     redesignedImage: { base64: result.base64ImageBytes, type: result.mimeType },
-    //     catalog: result.catalog,
-    //     style: selectedStyle,
-    //     climateZone: climateZone,
-    //   });
+    try {
+      const response = await fetch('/api/redesign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          original_image_url: originalImage,
+          style: selectedStyle,
+          allowStructuralChanges,
+          climateZone,
+        }),
+      });
 
-    //   setRedesignedImage(`data:${result.mimeType};base64,${result.base64ImageBytes}`);
-    //   setDesignCatalog(result.catalog);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'An unknown error occurred during redesign.');
+      }
 
-    // } catch (err) {
-    //   const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-    //   console.error("Redesign failed:", errorMessage);
-    //   setError(`Failed to generate redesign. ${errorMessage}.`);
-    //   addToast(`Redesign failed: ${errorMessage}`, 'error');
-    // } finally {
-    //   setIsLoading(false);
-    // }
+      const newDesign = await response.json();
+
+      saveNewRedesign(newDesign);
+      setRedesignedImage(newDesign.redesigned_image_url);
+      setDesignCatalog(newDesign.design_catalog);
+      addToast('Redesign complete!', 'success');
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      console.error("Redesign failed:", errorMessage);
+      setError(`Failed to generate redesign. ${errorMessage}.`);
+      addToast(`Redesign failed: ${errorMessage}`, 'error');
+    } finally {
+      setIsLoading(false);
+    }
   }, [originalImage, selectedStyle, allowStructuralChanges, climateZone, saveNewRedesign, addToast]);
 
   return (
