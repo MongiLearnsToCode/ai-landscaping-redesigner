@@ -1,6 +1,6 @@
 import React from 'react';
 import { DesignCatalog } from './DesignCatalog';
-import type { DesignCatalog as DesignCatalogType, ImageFile } from '../../types';
+import type { DesignCatalog as DesignCatalogType } from '../../types';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { ShareIcon } from './icons/ShareIcon';
 import { EnlargeIcon } from './icons/EnlargeIcon';
@@ -9,7 +9,7 @@ import { useToast } from '../contexts/ToastContext';
 import { ImageWithLoader } from './ImageWithLoader';
 
 interface ResultDisplayProps {
-  originalImageFile: ImageFile | null;
+  originalImageFile: string | null;
   redesignedImage: string | null;
   designCatalog: DesignCatalogType | null;
   isLoading: boolean;
