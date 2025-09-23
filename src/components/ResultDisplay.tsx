@@ -44,15 +44,24 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
     const { openModal } = useApp();
     const { addToast } = useToast();
 
-    const handleDownload = () => {
-        const link = document.createElement('a');
-        link.href = imageUrl;
-        const fileExtension = imageUrl.split(';')[0].split('/')[1] || 'png';
-        link.download = `redesigned-landscape.${fileExtension}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        addToast("Image download started!", "success");
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const fileExtension = blob.type.split('/')[1] || 'png';
+            link.download = `redesigned-landscape.${fileExtension}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            addToast("Image download started!", "success");
+        } catch (error) {
+            console.error('Error downloading image:', error);
+            addToast("Failed to download image.", "error");
+        }
     };
     
     const handleShare = async () => {
@@ -86,7 +95,7 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
             <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-4">{title}</h3>
             <div className="relative group w-full aspect-[4/3] rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <ImageWithLoader src={imageUrl} alt={title} />
-                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center gap-2 sm:gap-4 transition-opacity p-4">
+                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center gap-2 sm:gap-4 opacity-0 group-hover:opacity-100 transition-opacity p-4">
                     <button
                         onClick={() => openModal(imageUrl)}
                         className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
