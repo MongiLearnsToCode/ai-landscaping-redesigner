@@ -87,6 +87,14 @@ export default async function handler(
   const prompt = getPrompt(style, allowStructuralChanges, climateZone);
 
   try {
+    const imageResponse = await fetch(original_image_url);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image from URL: ${original_image_url}`);
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const imageBase64 = Buffer.from(imageBuffer).toString('base64');
+    const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
     const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -101,7 +109,12 @@ export default async function handler(
           {
             role: "user",
             content: [
-              { type: "image_url", image_url: { url: original_image_url } },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${imageBase64}`
+                }
+              },
               { type: "text", text: prompt },
             ]
           }
