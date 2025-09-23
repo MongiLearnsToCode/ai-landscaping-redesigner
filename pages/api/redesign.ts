@@ -104,7 +104,7 @@ export default async function handler(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemini-pro-vision",
+        model: "google/gemini-2.5-flash-image-preview",
         messages: [
           {
             role: "user",
