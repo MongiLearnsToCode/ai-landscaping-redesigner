@@ -99,7 +99,6 @@ export default async function handler(
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": `${process.env.NEXT_PUBLIC_SITE_URL}`,
         "X-Title": "AI Landscaping Redesigner",
         "Content-Type": "application/json"
       },
