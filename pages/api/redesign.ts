@@ -128,7 +128,9 @@ export default async function handler(
     }
 
     const result = await openRouterResponse.json();
+    console.log("OpenRouter result:", JSON.stringify(result, null, 2));
     const messageContent = result.choices[0]?.message?.content;
+    console.log("Message content:", messageContent);
 
     if (!messageContent) {
       throw new Error('Invalid response from OpenRouter model.');
