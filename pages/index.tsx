@@ -1,21 +1,22 @@
-
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { ImageUploader } from '../src/components/ImageUploader';
 import { StyleSelector } from '../src/components/StyleSelector';
 import { ClimateSelector } from '../src/components/ClimateSelector';
 import { ResultDisplay } from '../src/components/ResultDisplay';
 import { redesignOutdoorSpace } from '../src/services/geminiService';
 import { LANDSCAPING_STYLES } from '../constants';
-import type { LandscapingStyle, ImageFile, DesignCatalog, HydratedHistoryItem } from '../types';
+import type { LandscapingStyle, DesignCatalog, HydratedHistoryItem } from '../types';
 import { useApp } from '../src/contexts/AppContext';
 import { useHistory } from '../src/contexts/HistoryContext';
 import { useToast } from '../src/contexts/ToastContext';
+import SignInPage from './SignInPage';
 
 // Define the shape of the state we want to persist
 interface DesignerState {
-  originalImage: ImageFile | null;
+  originalImage: string | null;
   selectedStyle: LandscapingStyle;
   allowStructuralChanges: boolean;
   climateZone: string;
@@ -30,7 +31,7 @@ const getInitialState = (): DesignerState => {
   };
 };
 
-const DesignerPage: React.FC = () => {
+const DesignerPageContent: React.FC = () => {
   const { itemToLoad, onItemLoaded } = useApp();
   const { saveNewRedesign } = useHistory();
   const { addToast } = useToast();
@@ -44,23 +45,18 @@ const DesignerPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Persist state to localStorage whenever it changes
-  // useEffect(() => {
-  //   localStorage.setItem('designerSession', JSON.stringify(designerState));
-  // }, [designerState]);
-  
   // Load item from history
   useEffect(() => {
     if (itemToLoad) {
       const newState: DesignerState = {
-        originalImage: itemToLoad.originalImage,
+        originalImage: itemToLoad.original_image_url,
         selectedStyle: itemToLoad.style,
         allowStructuralChanges: false, // This is not saved in history, default to false
-        climateZone: itemToLoad.climateZone,
+        climateZone: itemToLoad.climate_zone,
       };
       setDesignerState(newState);
-      setRedesignedImage(itemToLoad.redesignedImage);
-      setDesignCatalog(itemToLoad.designCatalog);
+      setRedesignedImage(itemToLoad.redesigned_image_url);
+      setDesignCatalog(itemToLoad.design_catalog);
       setError(null);
       onItemLoaded();
     }
@@ -70,8 +66,8 @@ const DesignerPage: React.FC = () => {
     setDesignerState(prevState => ({ ...prevState, ...updates }));
   };
 
-  const handleImageUpload = (file: ImageFile | null) => {
-    updateState({ originalImage: file });
+  const handleImageUpload = (url: string | null) => {
+    updateState({ originalImage: url });
     setRedesignedImage(null);
     setDesignCatalog(null);
     setError(null);
@@ -88,37 +84,36 @@ const DesignerPage: React.FC = () => {
     setRedesignedImage(null);
     setDesignCatalog(null);
 
-    try {
-      const result = await redesignOutdoorSpace(
-        originalImage.base64,
-        originalImage.type,
-        selectedStyle,
-        allowStructuralChanges,
-        climateZone
-      );
+    addToast('This feature is being updated. Please check back soon!', 'info');
+    setIsLoading(false);
+    // try {
+    //   const result = await redesignOutdoorSpace(
+    //     originalImage.base64,
+    //     originalImage.type,
+    //     selectedStyle,
+    //     allowStructuralChanges,
+    //     climateZone
+    //   );
       
-      await saveNewRedesign({
-        originalImage: originalImage,
-        redesignedImage: { base64: result.base64ImageBytes, type: result.mimeType },
-        catalog: result.catalog,
-        style: selectedStyle,
-        climateZone: climateZone,
-      });
+    //   await saveNewRedesign({
+    //     originalImage: originalImage,
+    //     redesignedImage: { base64: result.base64ImageBytes, type: result.mimeType },
+    //     catalog: result.catalog,
+    //     style: selectedStyle,
+    //     climateZone: climateZone,
+    //   });
 
-      setRedesignedImage(`data:${result.mimeType};base64,${result.base64ImageBytes}`);
-      setDesignCatalog(result.catalog);
+    //   setRedesignedImage(`data:${result.mimeType};base64,${result.base64ImageBytes}`);
+    //   setDesignCatalog(result.catalog);
 
-      // Clear session so a refresh doesn't show the old inputs
-      // localStorage.removeItem('designerSession');
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-      console.error("Redesign failed:", errorMessage);
-      setError(`Failed to generate redesign. ${errorMessage}.`);
-      addToast(`Redesign failed: ${errorMessage}`, 'error');
-    } finally {
-      setIsLoading(false);
-    }
+    // } catch (err) {
+    //   const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+    //   console.error("Redesign failed:", errorMessage);
+    //   setError(`Failed to generate redesign. ${errorMessage}.`);
+    //   addToast(`Redesign failed: ${errorMessage}`, 'error');
+    // } finally {
+    //   setIsLoading(false);
+    // }
   }, [originalImage, selectedStyle, allowStructuralChanges, climateZone, saveNewRedesign, addToast]);
 
   return (
@@ -145,7 +140,7 @@ const DesignerPage: React.FC = () => {
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -160,7 +155,7 @@ const DesignerPage: React.FC = () => {
 
       <div className="lg:col-span-8">
         <ResultDisplay
-          originalImageFile={originalImage}
+          originalImageFile={originalImage} // This prop now expects a string URL
           redesignedImage={redesignedImage}
           designCatalog={designCatalog}
           isLoading={isLoading}
@@ -170,10 +165,15 @@ const DesignerPage: React.FC = () => {
   );
 };
 
-export const dynamic = 'force-dynamic';
+const DesignerPage: React.FC = () => {
+  const session = useSession();
+  const supabase = useSupabaseClient();
 
-export async function getServerSideProps() {
-  return { props: {} };
-}
+  if (!session) {
+    return <SignInPage />;
+  }
+
+  return <DesignerPageContent />;
+};
 
 export default DesignerPage;

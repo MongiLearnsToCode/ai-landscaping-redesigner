@@ -9,7 +9,7 @@ import { useToast } from '../contexts/ToastContext';
 import { ImageWithLoader } from './ImageWithLoader';
 
 interface ResultDisplayProps {
-  originalImageFile: ImageFile | null;
+  originalImageFile: string | null;
   redesignedImage: string | null;
   designCatalog: DesignCatalogType | null;
   isLoading: boolean;

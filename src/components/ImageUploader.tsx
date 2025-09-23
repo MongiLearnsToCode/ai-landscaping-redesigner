@@ -4,8 +4,8 @@ import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
 
 interface ImageUploaderProps {
-  onImageUpload: (file: ImageFile | null) => void;
-  initialImage?: ImageFile | null;
+  onImageUpload: (file: string | null) => void;
+  initialImage?: string | null;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, initialImage }) => {
@@ -16,35 +16,71 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, ini
   
   useEffect(() => {
     if (initialImage) {
-      const imageUrl = `data:${initialImage.type};base64,${initialImage.base64}`;
-      setPreview(imageUrl);
+      setPreview(initialImage);
     } else {
       setPreview(null);
     }
   }, [initialImage]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        addToast('Please select an image file.', 'error');
-        return;
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast('Please select an image file.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const paramsToSign = {
+        timestamp: Math.round(new Date().getTime() / 1000),
+        upload_preset: 'ai-landscaping-redesigner', // Create this upload preset in your Cloudinary account
+      };
+
+      const response = await fetch('/api/sign-cloudinary-params', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ paramsToSign }),
+      });
+
+      const { signature } = await response.json();
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '');
+      formData.append('timestamp', paramsToSign.timestamp.toString());
+      formData.append('signature', signature);
+      formData.append('upload_preset', paramsToSign.upload_preset);
+
+      const uploadResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload to Cloudinary failed');
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = (reader.result as string).split(',')[1];
-        if (base64String) {
-          const imageFile: ImageFile = {
-            name: file.name,
-            type: file.type,
-            base64: base64String,
-          };
-          setPreview(reader.result as string);
-          onImageUpload(imageFile);
-        }
-      };
-      reader.readAsDataURL(file);
+      const imageData = await uploadResponse.json();
+      onImageUpload(imageData.secure_url);
+      addToast('Image uploaded successfully!', 'success');
+
+    } catch (error) {
+      console.error("Upload error:", error);
+      addToast('Image upload failed. Please try again.', 'error');
+      setPreview(null); // Clear preview on error
+      onImageUpload(null);
     }
   };
   

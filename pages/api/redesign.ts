@@ -1,8 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { GoogleGenAI, Modality } from '@google/genai';
+import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
+import { v2 as cloudinary } from 'cloudinary';
+import type { DesignCatalog } from '../../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const model = 'gemini-2.5-flash-image-preview';
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
 const getPrompt = (style: string, allowStructuralChanges: boolean, climateZone: string) => {
   const structuralChangeInstruction = allowStructuralChanges
@@ -39,7 +45,7 @@ ${jsonSchemaString}
 `;
 };
 
-const parseDesignCatalog = (text: string) => {
+const parseDesignCatalog = (text: string): DesignCatalog | null => {
   try {
     const jsonStartIndex = text.indexOf('{');
     const jsonEndIndex = text.lastIndexOf('}');
@@ -62,74 +68,104 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-    return;
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  const { base64Image, mimeType, style, allowStructuralChanges, climateZone } = req.body;
+  const supabase = createPagesServerClient({ req, res });
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!base64Image || !mimeType || !style) {
-    res.status(400).json({ error: 'Missing required fields: base64Image, mimeType, style' });
-    return;
+  if (!session) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { original_image_url, style, allowStructuralChanges, climateZone } = req.body;
+
+  if (!original_image_url || !style) {
+    return res.status(400).json({ error: 'Missing required fields: original_image_url, style' });
   }
 
   const prompt = getPrompt(style, allowStructuralChanges, climateZone);
 
-  const imagePart = {
-    inlineData: {
-      data: base64Image,
-      mimeType: mimeType,
-    },
-  };
-
-  const textPart = {
-    text: prompt,
-  };
-
   try {
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: {
-        parts: [imagePart, textPart],
+    const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
       },
-      config: {
-        responseModalities: [Modality.IMAGE, Modality.TEXT],
-      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "image_url", image_url: { url: original_image_url } },
+              { type: "text", text: prompt },
+            ]
+          }
+        ]
+      })
     });
 
-    let redesignedImage = null;
-    let designCatalog = null;
+    if (!openRouterResponse.ok) {
+      const errorBody = await openRouterResponse.text();
+      console.error('OpenRouter API error:', errorBody);
+      throw new Error(`OpenRouter API request failed with status ${openRouterResponse.status}`);
+    }
 
-    if (response.candidates && response.candidates.length > 0) {
-      const parts = response.candidates[0].content.parts;
-      for (const part of parts) {
-        if (part.inlineData) {
-          redesignedImage = {
-            base64ImageBytes: part.inlineData.data,
-            mimeType: part.inlineData.mimeType,
-          };
-        } else if (part.text) {
-          designCatalog = parseDesignCatalog(part.text);
-        }
+    const result = await openRouterResponse.json();
+    const parts = result.choices[0]?.message?.content;
+
+    if (!Array.isArray(parts)) {
+      throw new Error('Invalid response from OpenRouter model. Expected an array of content parts.');
+    }
+
+    let redesignedImage: { base64: string; mimeType: string; } | null = null;
+    let design_catalog: DesignCatalog | null = null;
+
+    for (const part of parts) {
+      if (part.type === 'image_url' && part.image_url.url) {
+        const imageData = part.image_url.url;
+        const mimeType = imageData.split(';')[0].split(':')[1];
+        const base64 = imageData.split(',')[1];
+        redesignedImage = { base64, mimeType };
+      } else if (part.type === 'text') {
+        design_catalog = parseDesignCatalog(part.text);
       }
     }
 
     if (!redesignedImage) {
-      throw new Error('The model did not return a redesigned image.');
+      throw new Error('Model did not return a redesigned image.');
     }
 
-    res.status(200).json({
-      base64ImageBytes: redesignedImage.base64ImageBytes,
-      mimeType: redesignedImage.mimeType,
-      catalog: designCatalog || { plants: [], features: [] },
+    const uploadedImage = await cloudinary.uploader.upload(`data:${redesignedImage.mimeType};base64,${redesignedImage.base64}`, {
+      folder: `redesigns/${session.user.id}`,
+      transformation: { width: 1200, height: 900, crop: 'limit' }
     });
 
-  } catch (error) {
-    console.error('Error calling Gemini API:', error);
-    if (error instanceof Error) {
-      res.status(500).json({ error: `Gemini API error: ${error.message}` });
-    } else {
-      res.status(500).json({ error: 'An unknown error occurred while communicating with the Gemini API.' });
+    const { data: newRecord, error: dbError } = await supabase
+      .from('designs')
+      .insert({
+        user_id: session.user.id,
+        original_image_url,
+        redesigned_image_url: uploadedImage.secure_url,
+        style,
+        climate_zone: climateZone,
+        design_catalog,
+        is_pinned: false,
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      throw dbError;
     }
+
+    res.status(200).json(newRecord);
+
+  } catch (error) {
+    console.error('Redesign handler error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    res.status(500).json({ error: errorMessage });
   }
 }
