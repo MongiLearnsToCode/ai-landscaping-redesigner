@@ -128,18 +128,13 @@ export default async function handler(
     }
 
     const result = await openRouterResponse.json();
-    console.log("OpenRouter result:", JSON.stringify(result, null, 2));
     const messageContent = result.choices[0]?.message?.content;
-    console.log("Message content:", messageContent);
 
     if (!messageContent) {
       throw new Error('Invalid response from OpenRouter model.');
     }
 
-    // Here you would typically get an image URL or base64 data from the model.
-    // For this example, let's assume the model returns a placeholder URL and a JSON catalog.
-    // In a real scenario, you would parse the actual image data and upload it.
-    const redesigned_image_url_from_model = "https://placehold.co/1024x768/000000/FFFFFF.png?text=Redesigned+Image"; // Placeholder
+    const redesigned_image_url_from_model = result.choices[0]?.message?.images[0]?.image_url?.url;
     const design_catalog = parseDesignCatalog(messageContent);
 
     // Upload the redesigned image to Cloudinary (using the placeholder for now)
