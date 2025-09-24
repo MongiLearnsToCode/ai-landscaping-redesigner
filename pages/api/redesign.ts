@@ -171,3 +171,9 @@ export default async function handler(
 
     console.log('Successfully inserted new record:', newRecord);
     res.status(200).json(newRecord);
+  } catch (error) {
+    console.error('Redesign handler error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    res.status(500).json({ error: errorMessage });
+  }
+}
