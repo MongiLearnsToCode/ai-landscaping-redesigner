@@ -136,13 +136,25 @@ export default async function handler(
     const result = await openRouterResponse.json();
     console.log('Received response from OpenRouter:', result);
 
-    const messageContent = result.choices[0]?.message?.content;
+    const choices = result.choices;
+    if (!choices || choices.length === 0) {
+      console.error("API returned no valid choices:", result);
+      throw new Error("The AI provider returned an empty or invalid response.");
+    }
+
+    const messageContent = choices[0]?.message?.content;
 
     if (!messageContent) {
       throw new Error('Invalid response from OpenRouter model.');
     }
 
-    const redesigned_image_url_from_model = result.choices[0]?.message?.content.match(/https:\/\/[^\s]+\.png/g)[0];
+    const redesigned_image_url_from_model_match = messageContent.match(/https:\/\/[^\s]+\.png/g);
+    if (!redesigned_image_url_from_model_match || redesigned_image_url_from_model_match.length === 0) {
+      console.error("Could not find a valid image URL in the model response:", messageContent);
+      throw new Error("The AI provider did not return a valid image.");
+    }
+    const redesigned_image_url_from_model = redesigned_image_url_from_model_match[0];
+
     const design_catalog = parseDesignCatalog(messageContent);
     console.log('Parsed design catalog:', design_catalog);
 
