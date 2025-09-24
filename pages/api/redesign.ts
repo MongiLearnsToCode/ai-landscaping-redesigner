@@ -110,11 +110,18 @@ export default async function handler(
         messages: [
           {
             role: "user",
-            content: `data:${mimeType};base64,${imageBase64}`
-          },
-          {
-            role: "user",
-            content: prompt
+            content: [
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${imageBase64}`
+                }
+              },
+              {
+                type: "text",
+                text: prompt
+              }
+            ]
           }
         ]
       })
