@@ -5,6 +5,7 @@ import { Download, Share, ExternalLink } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
 import { ImageWithLoader } from './ImageWithLoader';
+import LoadingSteps from './LoadingSteps';
 
 interface ResultDisplayProps {
   originalImageFile: string | null;
@@ -13,28 +14,13 @@ interface ResultDisplayProps {
   isLoading: boolean;
 }
 
+
 const LoadingSkeleton: React.FC = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-pulse w-full flex flex-col">
-        <div className="bg-gray-300 dark:bg-gray-700 h-6 w-1/3 rounded mb-4"></div>
-        <div className="bg-gray-300 dark:bg-gray-700 aspect-[4/3] w-full rounded-lg"></div>
-        <div className="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-            <div className="bg-gray-300 dark:bg-gray-700 h-5 w-1/2 rounded mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <div className="bg-gray-300 dark:bg-gray-700 h-4 w-1/3 rounded mb-4"></div>
-                    <div className="space-y-2">
-                        <div className="bg-gray-300 dark:bg-gray-700 h-3 w-3/4 rounded"></div>
-                        <div className="bg-gray-300 dark:bg-gray-700 h-3 w-5/6 rounded"></div>
-                    </div>
-                </div>
-                 <div>
-                    <div className="bg-gray-300 dark:bg-gray-700 h-4 w-1/3 rounded mb-4"></div>
-                    <div className="space-y-2">
-                        <div className="bg-gray-300 dark:bg-gray-700 h-3 w-3/4 rounded"></div>
-                    </div>
-                </div>
-            </div>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-pulse w-full flex flex-col items-center justify-center min-h-[400px]">
+        <div className="w-full max-w-md">
+            <LoadingSteps />
         </div>
+        <div className="w-full aspect-[4/3] rounded-lg bg-gray-300 dark:bg-gray-700 mt-8"></div>
     </div>
 );
 
