@@ -105,7 +105,7 @@ export default async function handler(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL_ID || "google/gemini-flash-1.5-pro-preview",
+        model: process.env.OPENROUTER_MODEL_ID,
         max_tokens: 4096,
         messages: [
           {
