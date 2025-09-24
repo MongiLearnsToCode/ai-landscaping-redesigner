@@ -66,23 +66,23 @@
   "dataRoutes": [
     {
       "page": "/ContactPage",
-      "dataRouteRegex": "^/_next/data/E0csLsaMSyZLDcCJ7NvUH/ContactPage\\.json$"
+      "dataRouteRegex": "^/_next/data/1hmbqnRMxCR9yx874\\-2Pp/ContactPage\\.json$"
     },
     {
       "page": "/HistoryPage",
-      "dataRouteRegex": "^/_next/data/E0csLsaMSyZLDcCJ7NvUH/HistoryPage\\.json$"
+      "dataRouteRegex": "^/_next/data/1hmbqnRMxCR9yx874\\-2Pp/HistoryPage\\.json$"
     },
     {
       "page": "/PricingPage",
-      "dataRouteRegex": "^/_next/data/E0csLsaMSyZLDcCJ7NvUH/PricingPage\\.json$"
+      "dataRouteRegex": "^/_next/data/1hmbqnRMxCR9yx874\\-2Pp/PricingPage\\.json$"
     },
     {
       "page": "/PrivacyPage",
-      "dataRouteRegex": "^/_next/data/E0csLsaMSyZLDcCJ7NvUH/PrivacyPage\\.json$"
+      "dataRouteRegex": "^/_next/data/1hmbqnRMxCR9yx874\\-2Pp/PrivacyPage\\.json$"
     },
     {
       "page": "/TermsPage",
-      "dataRouteRegex": "^/_next/data/E0csLsaMSyZLDcCJ7NvUH/TermsPage\\.json$"
+      "dataRouteRegex": "^/_next/data/1hmbqnRMxCR9yx874\\-2Pp/TermsPage\\.json$"
     }
   ],
   "rsc": {

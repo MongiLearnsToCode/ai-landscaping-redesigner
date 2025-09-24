@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import type { DesignCatalog as DesignCatalogType } from '../../types';
-import { PlantIcon } from './icons/PlantIcon';
-import { FeatureIcon } from './icons/FeatureIcon';
-import { ClipboardIcon } from './icons/ClipboardIcon';
+import { Sprout } from 'lucide-react';
+import { Star } from 'lucide-react';
+import { Clipboard } from 'lucide-react';
+import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
 
 interface DesignCatalogProps {
@@ -54,7 +55,7 @@ export const DesignCatalog: React.FC<DesignCatalogProps> = ({ catalog }) => {
           onClick={handleCopy}
           className="flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors"
         >
-          <ClipboardIcon className="h-4 w-4 mr-2" />
+          <Clipboard className="h-4 w-4 mr-2" />
           Copy List
         </button>
       </div>
@@ -63,7 +64,7 @@ export const DesignCatalog: React.FC<DesignCatalogProps> = ({ catalog }) => {
         {hasPlants && (
           <div className="space-y-3">
             <h5 className="flex items-center text-md font-semibold text-gray-600 dark:text-gray-400">
-              <PlantIcon className="h-5 w-5 mr-2 text-emerald-500" />
+              <Sprout className="h-5 w-5 mr-2 text-emerald-500" />
               Plants & Flora
             </h5>
             <ul className="space-y-2 pl-1">
@@ -79,7 +80,7 @@ export const DesignCatalog: React.FC<DesignCatalogProps> = ({ catalog }) => {
         {hasFeatures && (
           <div className="space-y-3">
             <h5 className="flex items-center text-md font-semibold text-gray-600 dark:text-gray-400">
-              <FeatureIcon className="h-5 w-5 mr-2 text-sky-500" />
+              <Star className="h-5 w-5 mr-2 text-sky-500" />
               Furniture & Features
             </h5>
             <ul className="space-y-2 pl-1">

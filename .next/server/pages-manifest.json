@@ -1,15 +1,15 @@
 {
   "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/api/redesign": "pages/api/redesign.js",
   "/api/sign-cloudinary-params": "pages/api/sign-cloudinary-params.js",
   "/auth": "pages/auth.html",
   "/": "pages/index.html",
-  "/ContactPage": "pages/ContactPage.js",
-  "/HistoryPage": "pages/HistoryPage.js",
   "/PrivacyPage": "pages/PrivacyPage.js",
-  "/TermsPage": "pages/TermsPage.js",
+  "/ContactPage": "pages/ContactPage.js",
+  "/_error": "pages/_error.js",
+  "/HistoryPage": "pages/HistoryPage.js",
   "/PricingPage": "pages/PricingPage.js",
+  "/TermsPage": "pages/TermsPage.js",
   "/404": "pages/404.html"
 }

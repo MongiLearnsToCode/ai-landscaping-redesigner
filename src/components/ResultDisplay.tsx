@@ -1,9 +1,7 @@
 import React from 'react';
 import { DesignCatalog } from './DesignCatalog';
 import type { DesignCatalog as DesignCatalogType } from '../../types';
-import { DownloadIcon } from './icons/DownloadIcon';
-import { ShareIcon } from './icons/ShareIcon';
-import { EnlargeIcon } from './icons/EnlargeIcon';
+import { Download, Share, ExternalLink } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
 import { ImageWithLoader } from './ImageWithLoader';
@@ -44,7 +42,7 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
     const { openModal } = useApp();
     const { addToast } = useToast();
 
-    const handleDownload = async () => {
+    const onDownload = async () => {
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
@@ -64,7 +62,7 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
         }
     };
     
-    const handleShare = async () => {
+    const onShare = async () => {
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
@@ -90,38 +88,34 @@ const ImageCard: React.FC<{ title: string; imageUrl: string; catalog: DesignCata
     
     const canShare = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
+    const onEnlarge = () => openModal(imageUrl);
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 flex flex-col">
             <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-4">{title}</h3>
             <div className="relative w-full">
                 <div className="absolute top-0 right-0 z-10 flex items-center gap-2 p-2">
-                    <button
-                        onClick={() => openModal(imageUrl)}
-                        className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
-                        aria-label="View larger"
-                    >
-                        <EnlargeIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
-                        Larger
-                    </button>
-                    <button
-                        onClick={handleDownload}
-                        className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
-                        aria-label="Download image"
-                    >
-                        <DownloadIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
-                        Download
-                    </button>
-                    {canShare && (
-                         <button
-                            onClick={handleShare}
-                            className="bg-white/90 hover:bg-white text-gray-800 font-bold px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm shadow-md hover:shadow-xl transition-all duration-200 flex items-center"
-                            aria-label="Share image"
-                        >
-                            <ShareIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
-                            Share
-                        </button>
-                    )}
-                </div>
+                                      <button
+                                        onClick={onEnlarge}
+                                        className="flex items-center justify-center rounded-md bg-gray-200 px-3 py-2 text-xs font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 md:px-4 md:py-2 md:text-sm"
+                                      >
+                                        <ExternalLink className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+                                        Enlarge
+                                      </button>
+                                      <button
+                                        onClick={onDownload}
+                                        className="flex items-center justify-center rounded-md bg-sky-500 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700 md:px-4 md:py-2 md:text-sm"
+                                      >
+                                        <Download className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+                                        Download
+                                      </button>
+                                      <button
+                                        onClick={onShare}
+                                        className="flex items-center justify-center rounded-md bg-gray-200 px-3 py-2 text-xs font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 md:px-4 md:py-2 md:text-sm"
+                                      >
+                                        <Share className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+                                        Share
+                                      </button>                </div>
                 <div className="relative group w-full aspect-[4/3] rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
                     <ImageWithLoader src={imageUrl} alt={title} />
                 </div>

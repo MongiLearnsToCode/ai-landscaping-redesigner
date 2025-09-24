@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LeafIcon } from './icons/LeafIcon';
+import { Leaf } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
     <header className="bg-white dark:bg-gray-800 shadow-md relative">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center cursor-pointer">
-          <LeafIcon className="h-8 w-8 md:h-10 md:w-10 text-emerald-600 mr-2 md:mr-3" />
+          <Leaf className="h-8 w-8 md:h-10 md:w-10 text-emerald-600 mr-2 md:mr-3" />
           <div>
             <h1 className="text-lg md:text-2xl font-bold text-gray-800 dark:text-gray-100">AI Landscaping Redesigner</h1>
             <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Transform your outdoor space with the power of AI</p>

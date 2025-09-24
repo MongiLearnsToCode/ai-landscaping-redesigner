@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { HistoryItem } from '../../types';
-import { PinIcon } from './icons/PinIcon';
-import { TrashIcon } from './icons/TrashIcon';
+import { Pin, Trash2 } from 'lucide-react';
 import { ImageWithLoader } from './ImageWithLoader';
 
 interface HistoryCardProps {
@@ -28,7 +27,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({ item, onView, onPin, o
         </div>
         {item.is_pinned && (
             <div className="absolute top-2 right-2 bg-amber-400 p-1.5 rounded-full shadow-md">
-                <PinIcon className="h-4 w-4 text-white" filled />
+                <Pin className="h-4 w-4 text-white" fill="currentColor" />
             </div>
         )}
       </div>
@@ -40,22 +39,14 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({ item, onView, onPin, o
              >
                  View
              </button>
-            <button
-                onClick={() => onPin(item.id)}
-                title={item.is_pinned ? 'Unpin' : 'Pin'}
-                className={`p-2 rounded-md transition-colors ${item.is_pinned ? 'bg-amber-100 hover:bg-amber-200 dark:bg-amber-800 dark:hover:bg-amber-700' : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500'}`}
-                aria-label={item.is_pinned ? 'Unpin item' : 'Pin item'}
-            >
-                <PinIcon className={`h-5 w-5 ${item.is_pinned ? 'text-amber-500 dark:text-amber-300' : 'text-gray-600 dark:text-gray-300'}`} filled={item.is_pinned} />
-            </button>
-             <button
-                onClick={() => onDelete(item.id)}
-                title="Delete"
-                className="p-2 rounded-md bg-gray-200 hover:bg-red-200 dark:bg-gray-600 dark:hover:bg-red-800 transition-colors"
-                aria-label="Delete item"
-            >
-                <TrashIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400" />
-            </button>
+        <div className="absolute top-2 right-2 flex items-center space-x-2">
+          <button onClick={(e) => { e.stopPropagation(); onPin(item.id); }} className="p-1.5 rounded-full bg-black bg-opacity-50 hover:bg-opacity-75 transition-opacity duration-200">
+            <Pin className={`h-5 w-5 ${item.is_pinned ? 'text-amber-500 dark:text-amber-300' : 'text-gray-600 dark:text-gray-300'}`} fill={item.is_pinned ? 'currentColor' : 'none'} />
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(item.id); }} className="p-1.5 rounded-full bg-black bg-opacity-50 hover:bg-opacity-75 transition-opacity duration-200 group">
+            <Trash2 className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400" />
+          </button>
+        </div>
          </div>
       </div>
     </div>
