@@ -106,18 +106,15 @@ export default async function handler(
       },
       body: JSON.stringify({
         model: "google/gemini-pro-vision",
+        max_tokens: 4096,
         messages: [
           {
             role: "user",
-            content: [
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${imageBase64}`
-                }
-              },
-              { type: "text", text: prompt },
-            ]
+            content: `data:${mimeType};base64,${imageBase64}`
+          },
+          {
+            role: "user",
+            content: prompt
           }
         ]
       })
@@ -126,7 +123,7 @@ export default async function handler(
     if (!openRouterResponse.ok) {
       const errorBody = await openRouterResponse.text();
       console.error('OpenRouter API error:', errorBody);
-      throw new Error(`OpenRouter API request failed with status ${openRouterResponse.status}`);
+      return res.status(openRouterResponse.status).json({ error: `OpenRouter API request failed: ${errorBody}` });
     }
 
     const result = await openRouterResponse.json();
