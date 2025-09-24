@@ -85,6 +85,7 @@ export default async function handler(
   }
 
   const prompt = getPrompt(style, allowStructuralChanges, climateZone);
+  console.log('Generated prompt for OpenRouter:', prompt);
 
   try {
     const imageResponse = await fetch(original_image_url);
@@ -95,6 +96,7 @@ export default async function handler(
     const imageBase64 = Buffer.from(imageBuffer).toString('base64');
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
+    console.log('Sending request to OpenRouter...');
     const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -103,7 +105,7 @@ export default async function handler(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
+        model: "google/gemini-pro-vision",
         messages: [
           {
             role: "user",
@@ -128,21 +130,26 @@ export default async function handler(
     }
 
     const result = await openRouterResponse.json();
+    console.log('Received response from OpenRouter:', result);
+
     const messageContent = result.choices[0]?.message?.content;
 
     if (!messageContent) {
       throw new Error('Invalid response from OpenRouter model.');
     }
 
-    const redesigned_image_url_from_model = result.choices[0]?.message?.images[0]?.image_url?.url;
+    const redesigned_image_url_from_model = result.choices[0]?.message?.content.match(/https:\/\/[^\s]+\.png/g)[0];
     const design_catalog = parseDesignCatalog(messageContent);
+    console.log('Parsed design catalog:', design_catalog);
 
-    // Upload the redesigned image to Cloudinary (using the placeholder for now)
+    console.log('Uploading redesigned image to Cloudinary...');
     const uploadedImage = await cloudinary.uploader.upload(redesigned_image_url_from_model, {
       folder: `redesigns/${session.user.id}`,
       transformation: { width: 1200, height: 900, crop: 'limit' }
     });
+    console.log('Image uploaded to Cloudinary:', uploadedImage.secure_url);
 
+    console.log('Inserting new design record into Supabase...');
     const { data: newRecord, error: dbError } = await supabase
       .from('designs')
       .insert({
@@ -158,14 +165,9 @@ export default async function handler(
       .single();
 
     if (dbError) {
+      console.error('Supabase insert error:', dbError);
       throw dbError;
     }
 
+    console.log('Successfully inserted new record:', newRecord);
     res.status(200).json(newRecord);
-
-  } catch (error) {
-    console.error('Redesign handler error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-    res.status(500).json({ error: errorMessage });
-  }
-}
